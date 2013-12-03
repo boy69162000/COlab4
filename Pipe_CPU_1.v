@@ -90,9 +90,10 @@ Instr_Memory IM(
 Pipe_Reg #(.size(64)) IF_ID(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-			.data_i({pcn_i_ifid, instr_i_ifid}),
-			.data_o({pcn_o_ifid, instr_o_ifid})
-		);
+            .stall(1'b0),
+            .data_i({pcn_i_ifid, instr_i_ifid}),
+            .data_o({pcn_o_ifid, instr_o_ifid})
+        );
 //ID
 Reg_File RF(
         .clk_i(clk_i),
@@ -129,17 +130,18 @@ ShiftAmount_Extend SA(
 Pipe_Reg #(.size(170)) ID_EX(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-			.data_i({rdata1_i_idex, rdata2_i_idex, instr_o_ifid[25:0], pcn_o_ifid, 
-			         SAex_i_idex, aluop_i_idex, regd_i_idex,
-			         btype_i_idex, mtor_i_idex, regw_i_idex,
-			         alusrc_i_idex, branch_i_idex, sign_i_idex,
-			         j_i_idex, memr_i_idex, memw_i_idex}),
-			.data_o({rdata1_o_idex, rdata2_o_idex, instr_o_idex, pcn_o_idex,
-			         SAex_o_idex, aluop_o_idex, regd_o_idex,
-			         btype_o_idex, mtor_o_idex, regw_o_idex,
-			         alusrc_o_idex, branch_o_idex, sign_o_idex,
-			         j_o_idex, memr_o_idex, memw_o_idex})
-		);
+            .stall((branch_o_exmem & rzmux)),
+            .data_i({rdata1_i_idex, rdata2_i_idex, instr_o_ifid[25:0], pcn_o_ifid, 
+                     SAex_i_idex, aluop_i_idex, regd_i_idex,
+                     btype_i_idex, mtor_i_idex, regw_i_idex,
+                     alusrc_i_idex, branch_i_idex, sign_i_idex,
+                     j_i_idex, memr_i_idex, memw_i_idex}),
+            .data_o({rdata1_o_idex, rdata2_o_idex, instr_o_idex, pcn_o_idex,
+                     SAex_o_idex, aluop_o_idex, regd_o_idex,
+                     btype_o_idex, mtor_o_idex, regw_o_idex,
+                     alusrc_o_idex, branch_o_idex, sign_o_idex,
+                     j_o_idex, memr_o_idex, memw_o_idex})
+        );
 //EX
 ALU_Ctrl AC(
         .funct_i(instr_o_idex[5:0]),
@@ -204,7 +206,8 @@ Adder Adder2(
 Pipe_Reg #(.size(240)) EX_MEM(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-			.data_i({aluresult_i_exmem, pcb_i_exmem,
+            .stall(branch_o_exmem & rzmux),
+            .data_i({aluresult_i_exmem, pcb_i_exmem,
                      pcn_o_idex, {pcn_o_idex[31:28], instr_o_idex[25:0], 2'b00},
                      rdata1_o_idex, rdata2_o_idex, signex_i_exmem,
                      btype_o_idex, mtor_o_idex,
@@ -212,7 +215,7 @@ Pipe_Reg #(.size(240)) EX_MEM(
                      regw_o_idex, branch_o_idex, 
                      j_o_idex, memr_o_idex,
                      bonusctrl[1], memw_o_idex}),
-			.data_o({aluresult_o_exmem, pcb_o_exmem,
+            .data_o({aluresult_o_exmem, pcb_o_exmem,
                      pcn_o_exmem, jaddr_o_exmem,
                      rdata1_o_exmem, rdata2_o_exmem, signex_o_exmem,
                      btype_o_exmem, mtor_o_exmem,
@@ -220,7 +223,7 @@ Pipe_Reg #(.size(240)) EX_MEM(
                      regw_o_exmem, branch_o_exmem, 
                      j_o_exmem, memr_o_exmem,
                      bonus_o_exmem, memw_o_exmem})
-		);
+        );
 
 //MEM
 Data_Memory DM(
@@ -258,15 +261,16 @@ MUX_2to1 #(.size(32)) Mux_Jump(
 Pipe_Reg #(.size(136)) MEM_WB(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-			.data_i({mdata_i_memwb, aluresult_o_exmem,
-			         pcn_o_exmem, signex_o_exmem,
+            .stall(1'b0),
+            .data_i({mdata_i_memwb, aluresult_o_exmem,
+                     pcn_o_exmem, signex_o_exmem,
                      mtor_o_exmem, regtow_o_exmem,
                      regw_o_exmem}),
-			.data_o({mdata_o_memwb, aluresult_o_memwb,
-			         pcn_o_memwb, signex_o_memwb,
+            .data_o({mdata_o_memwb, aluresult_o_memwb,
+                     pcn_o_memwb, signex_o_memwb,
                      mtor_o_memwb, regtow_o_memwb,
                      regw_o_memwb})
-		);
+        );
 //WB
 MUX_4to1 #(.size(32)) Mux_WReg_Src(
         .data0_i(aluresult_o_memwb),
