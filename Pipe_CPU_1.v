@@ -90,7 +90,7 @@ Instr_Memory IM(
 Pipe_Reg #(.size(64)) IF_ID(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-            .stall(1'b0),
+            .stall(branch_o_exmem & zero_o_exmem),
             .data_i({pcn_i_ifid, instr_i_ifid}),
             .data_o({pcn_o_ifid, instr_o_ifid})
         );
@@ -130,7 +130,7 @@ ShiftAmount_Extend SA(
 Pipe_Reg #(.size(170)) ID_EX(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-            .stall((branch_o_exmem & rzmux)),
+            .stall(branch_o_exmem & zero_o_exmem),
             .data_i({rdata1_i_idex, rdata2_i_idex, instr_o_ifid[25:0], pcn_o_ifid, 
                      SAex_i_idex, aluop_i_idex, regd_i_idex,
                      btype_i_idex, mtor_i_idex, regw_i_idex,
@@ -206,7 +206,7 @@ Adder Adder2(
 Pipe_Reg #(.size(240)) EX_MEM(       
             .clk_i(clk_i),
             .rst_n(rst_n),
-            .stall(branch_o_exmem & rzmux),
+            .stall(branch_o_exmem & zero_o_exmem),
             .data_i({aluresult_i_exmem, pcb_i_exmem,
                      pcn_o_idex, {pcn_o_idex[31:28], instr_o_idex[25:0], 2'b00},
                      rdata1_o_idex, rdata2_o_idex, signex_i_exmem,
