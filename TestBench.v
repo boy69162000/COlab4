@@ -38,14 +38,14 @@ $readmemb("CO_P4_test1.txt", cpu.IM.Instr_Mem);
 	count = 0;
     
     #(`CYCLE_TIME)      RST = 1;
-    #(`CYCLE_TIME*40)      $stop;
+    #(`CYCLE_TIME*800)      $stop;
 
 end
 
 
 always@(posedge CLK) begin
     count = count + 1;
-	if( count == 30 ) begin 
+	if( count == 650 ) begin 
 	//print result to transcript 
 	$display("Register===========================================================\n");
 	$display("r0=%d, r1=%d, r2=%d, r3=%d, r4=%d, r5=%d, r6=%d, r7=%d\n",
